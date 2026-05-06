@@ -1,0 +1,261 @@
+/* Agreement.css - PDF-specific styles */
+
+/* PDF Mode Styles */
+@media print {
+  .agreement-wrapper {
+    margin: 0;
+    padding: 0;
+  }
+
+  .pdf-button-container {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .avoid-page-break {
+    page-break-inside: avoid;
+  }
+
+  .signature-section {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure proper page breaks */
+  .page {
+    page-break-after: always;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+}
+
+/* Non-PDF Mode Styles */
+@media screen {
+  .page-break {
+    display: block;
+    height: 20px;
+    margin: 20px 0;
+    border-bottom: 2px dashed #e5e7eb;
+    position: relative;
+  }
+
+  .page-break::after {
+    content: "Page Break";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 0 10px;
+    color: #6b7280;
+    font-size: 12px;
+  }
+
+  /* Ensure proper spacing for signature sections */
+  .signature-section {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+
+/* Common Styles */
+#agreement-content {
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+/* Improve list styling for PDF */
+#agreement-content ol {
+  margin-left: 1.5rem;
+}
+
+#agreement-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Signature line styles */
+.signature-line {
+  border-bottom: 1px solid #374151;
+  min-width: 200px;
+  height: 20px;
+  display: inline-block;
+  margin: 0 10px;
+}
+
+/* Company seal styling */
+.company-seal {
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* Witness section styling */
+.witness-section {
+  margin-top: 40px;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 640px) {
+  .agreement-wrapper {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  #agreement-content {
+    padding: 1rem !important;
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+
+  .text-right {
+    text-align: center !important;
+  }
+
+  .signature-section > div {
+    margin-bottom: 2rem;
+  }
+
+  /* Adjust signature boxes for mobile */
+  .border-gray-300 {
+    padding: 1rem !important;
+  }
+
+  /* Reduce font sizes for better mobile display */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2, h3 {
+    font-size: 1.25rem !important;
+  }
+
+  p, li {
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Hindi text specific styling */
+.hindi-section {
+  font-family: 'Noto Sans Devanagari', 'Mangal', 'Arial', sans-serif;
+  direction: ltr;
+}
+
+/* Ensure proper spacing between pages in PDF */
+.pdf-mode .page {
+  margin-bottom: 40px;
+}
+
+/* Button styling for better UX */
+.pdf-button-container button {
+  transition: all 0.3s ease;
+}
+
+.pdf-button-container button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Print-specific adjustments */
+@media print {
+  @page {
+    margin: 15mm;
+    size: A4 portrait;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #agreement-content {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .bg-gray-50, .bg-yellow-50, .bg-gray-100 {
+    background-color: transparent !important;
+  }
+
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  .rounded-lg {
+    border-radius: 0 !important;
+  }
+
+  /* Ensure proper text colors in print */
+  .text-gray-600, .text-gray-700, .text-gray-800 {
+    color: #000000 !important;
+  }
+
+  .text-blue-600 {
+    color: #000000 !important;
+  }
+
+  /* Ensure borders are visible in print */
+  .border, .border-t, .border-b {
+    border-color: #000000 !important;
+  }
+
+  /* Hide unnecessary elements in print */
+  .pdf-button-container,
+  .page-break::after {
+    display: none !important;
+  }
+}
+
+/* Ensure proper line breaks for long text */
+.text-justify {
+  text-align: justify;
+  hyphens: auto;
+  word-wrap: break-word;
+}
+
+/* Custom scrollbar for better UX */
+@media screen {
+  .agreement-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+
+  .agreement-wrapper::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .agreement-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  .agreement-wrapper::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+  }
+}

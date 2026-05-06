@@ -1,0 +1,182 @@
+.plans-container {
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f9ff 0%, #f0fdfa 100%);
+  min-height: 100vh;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.plans-header h1 {
+  color: #0671FF;
+  margin-bottom: 0.5rem;
+  font-size: 2.2rem;
+}
+
+.plans-header p {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.plan-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  background-color: white;
+  border: 2px solid #0671FF;
+  color: #0671FF;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  background-color: #e6f1ff;
+}
+
+.tab-button.active {
+  background-color: #0671FF;
+  color: white;
+}
+
+.plan-details {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.plan-header {
+  text-align: center;
+  border-bottom: 2px solid #f1f1f1;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.plan-header h2 {
+  color: #212529;
+  margin-bottom: 0.5rem;
+}
+
+.plan-amount {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #02D396;
+}
+
+.plan-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-item {
+  background-color: #f8f9fa;
+  padding: 1.25rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-3px);
+}
+
+.stat-label {
+  display: block;
+  color: #6c757d;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.stat-value {
+  display: block;
+  color: #0671FF;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.additional-values {
+  margin-bottom: 2rem;
+}
+
+.additional-values h3 {
+  color: #212529;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.value-item {
+  background: linear-gradient(135deg, #0671FF 0%, #02D396 100%);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.invest-button {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #0671FF 0%, #02D396 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.invest-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 211, 150, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .plans-container {
+    padding: 1rem;
+  }
+  
+  .plan-tabs {
+    flex-direction: column;
+  }
+  
+  .plan-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .values-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

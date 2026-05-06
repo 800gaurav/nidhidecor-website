@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+
+/* Global styles for mobile responsiveness */
+body {
+  /* padding-top: 64px; */
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  font-family: "Inter", sans-serif;
+}
+
+/* Responsive navbar padding */
+/* 
+@media (min-width: 640px) {
+  body {
+    padding-top: 72px; 
+  }
+} */
+
+/* Mobile-first responsive utilities */
+/* @media (max-width: 640px) {
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+} */
+
+/* Smooth scrolling for mobile */
+/* html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+} */
+
+/* Dark mode utilities */
+/* .dark {
+  color-scheme: dark;
+} */
+
+/* .light {
+  color-scheme: light;
+} */
+
+/* .dark body {
+  @apply text-white bg-black;
+} */
+/* 
+.light body {
+  @apply text-black bg-white;
+} */
+
+/* Custom scrollbar for dark mode */
+
+
+/* pointer animation  */
+
+/* Base cursor dot */
+
+/* .cursor-dot {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background-color: yellow;
+  background: linear-gradient(to right, #FF6EC7, #FFD700);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  transition: background 0.2s ease;
+} */
+
+/* .cursor-idle-ring {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid yellow;
+  background: rgba(0, 0, 0, 0.6);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9998;
+  animation: idlePulse 1s ease-out forwards;
+  opacity: 1;
+} */
+
+@keyframes idlePulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.8);
+    opacity: 0;
+  }
+}

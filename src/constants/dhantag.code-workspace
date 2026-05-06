@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../../react-native/dhantag-app-react-native"
+		}
+	],
+	"settings": {}
+}

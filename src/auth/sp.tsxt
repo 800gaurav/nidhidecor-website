@@ -1,0 +1,662 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import {
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  CreditCard,
+  FileText,
+  CheckCircle,
+  Key
+} from "lucide-react";
+import useAxios from "../utils/useAxios";
+import Button from "../component/wrapper/Button";
+import projectDetails from "../constants/strings";
+import { endpoints } from "../constants/apiEndpoints";
+import { showErrorToast } from "../component/toaster";
+
+const MultiStepSignup = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [checkingReferral, setCheckingReferral] = useState(false);
+  const [referrerName, setReferrerName] = useState("");
+  const [searchParams] = useSearchParams();
+  const referralID = searchParams.get("referalID");
+  
+  // Form data state matching your schema
+  const [formData, setFormData] = useState({
+    // Step 1: Basic Info
+    name: "",
+    gender: "",
+    dateOfBirth: "",
+    email: "",
+    maritalStatus: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    referrerCode: referralID || "",
+
+    // Step 2: Address
+    address: {
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      district: "",
+      postOffice: "",
+      pincode: ""
+    },
+
+    // Step 4: Bank KYC
+    bankKyc: {
+      panNumber: "",
+      accountHolderName: "",
+      accountNumber: "",
+      ifscCode: "",
+      bankName: "",
+      branchName: ""
+    },
+
+    // Step 5: User KYC - Multiple Documents
+    userKyc: {
+      documents: [
+        {
+          documentType: "",
+          documentNumber: "",
+          documentFront: null,
+          documentBack: null
+        }
+      ]
+    }
+  });
+
+  const navigate = useNavigate();
+  const { fetchData } = useAxios();
+
+  const steps = [
+    { number: 1, title: "Basic Information", icon: User },
+    { number: 2, title: "Address Details", icon: MapPin },
+    { number: 3, title: "Bank Details", icon: CreditCard },
+    { number: 4, title: "KYC Documents", icon: FileText }
+  ];
+
+  const documentTypes = [
+    "Aadhar Card",
+    "PAN Card",
+    "Driving License",
+    "Passport",
+    "Voter ID",
+    "Bank Passbook",
+    "Utility Bill",
+    "Ration Card"
+  ];
+
+  // Check referral code validity
+  const checkReferralCode = async (code) => {
+    try {
+      setCheckingReferral(true);
+      const res = await fetchData({
+        url: `/api/v1/user/auth/get-refrrer-name?referralCode=${code}`,
+      });
+
+      if (res.success) {
+        setReferrerName(res.data.name || projectDetails.verifiedUser);
+        setFieldErrors((prev) => ({ ...prev, referrerCode: "" }));
+      } else {
+        setFieldErrors((prev) => ({
+          ...prev,
+          referrerCode: projectDetails.errors.invalidReferralCode,
+        }));
+        setReferrerName("");
+      }
+    } catch (error) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        referrerCode: error?.message || projectDetails.errors.networkError,
+      }));
+      setReferrerName("");
+    } finally {
+      setCheckingReferral(false);
+    }
+  };
+
+  const handleInputChange = (section, field, value, index = null) => {
+    if (section === "userKyc" && index !== null) {
+      // Handle multiple documents
+      setFormData(prev => ({
+        ...prev,
+        userKyc: {
+          ...prev.userKyc,
+          documents: prev.userKyc.documents.map((doc, i) => 
+            i === index ? { ...doc, [field]: value } : doc
+          )
+        }
+      }));
+    } else if (section) {
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+
+      // Auto-check referral code when it's 8 characters
+      if (field === "referrerCode" && value.length === 8) {
+        checkReferralCode(value);
+      }
+    }
+  };
+
+  const addDocument = () => {
+    setFormData(prev => ({
+      ...prev,
+      userKyc: {
+        ...prev.userKyc,
+        documents: [
+          ...prev.userKyc.documents,
+          {
+            documentType: "",
+            documentNumber: "",
+            documentFront: null,
+            documentBack: null
+          }
+        ]
+      }
+    }));
+  };
+
+  const removeDocument = (index) => {
+    if (formData.userKyc.documents.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        userKyc: {
+          ...prev.userKyc,
+          documents: prev.userKyc.documents.filter((_, i) => i !== index)
+        }
+      }));
+    }
+  };
+
+  const validateStep = (step) => {
+    const errors = {};
+
+    switch (step) {
+      case 1:
+        if (!formData.name.trim()) errors.name = "Name is required";
+        if (!formData.email.match(projectDetails.patterns.email)) errors.email = "Invalid email";
+        if (!formData.phone.match(projectDetails.patterns.phone)) errors.phone = "Invalid phone";
+        if (formData.password.length < 6) errors.password = "Password must be at least 6 characters";
+        if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords don't match";
+        if (!formData.referrerCode.trim()) errors.referrerCode = "Referral code is required";
+        if (formData.referrerCode.length !== 8) errors.referrerCode = "Referral code must be 8 characters";
+        break;
+
+      case 2:
+        if (!formData.address.addressLine1.trim()) errors.addressLine1 = "Address line 1 is required";
+        if (!formData.address.city.trim()) errors.city = "City is required";
+        if (!formData.address.pincode.trim()) errors.pincode = "Pincode is required";
+        break;
+
+      case 3:
+        if (!formData.bankKyc.panNumber.trim()) errors.panNumber = "PAN number is required";
+        if (!formData.bankKyc.accountNumber.trim()) errors.accountNumber = "Account number is required";
+        if (!formData.bankKyc.ifscCode.trim()) errors.ifscCode = "IFSC code is required";
+        break;
+
+      case 4:
+        formData.userKyc.documents.forEach((doc, index) => {
+          if (!doc.documentType.trim()) errors[`documentType_${index}`] = "Document type is required";
+          if (!doc.documentNumber.trim()) errors[`documentNumber_${index}`] = "Document number is required";
+          if (!doc.documentFront) errors[`documentFront_${index}`] = "Document front is required";
+        });
+        break;
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, steps.length));
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleFileUpload = (field, file, index = 0) => {
+    handleInputChange("userKyc", field, file, index);
+  };
+
+  const prepareFormData = () => {
+    const data = new FormData();
+    
+    // Append all basic fields
+    Object.keys(formData).forEach(key => {
+      if (key !== 'address' && key !== 'bankKyc' && key !== 'userKyc' && key !== 'confirmPassword') {
+        if (formData[key] !== null && formData[key] !== undefined) {
+          data.append(key, formData[key]);
+        }
+      }
+    });
+
+    // Append nested objects
+    ['address', 'bankKyc'].forEach(section => {
+      Object.keys(formData[section]).forEach(field => {
+        if (formData[section][field]) {
+          data.append(`${section}.${field}`, formData[section][field]);
+        }
+      });
+    });
+
+    // Append multiple documents
+    formData.userKyc.documents.forEach((doc, index) => {
+      data.append(`userKyc.documents[${index}].documentType`, doc.documentType);
+      data.append(`userKyc.documents[${index}].documentNumber`, doc.documentNumber);
+      if (doc.documentFront) {
+        data.append(`documentFront_${index}`, doc.documentFront);
+      }
+      if (doc.documentBack) {
+        data.append(`documentBack_${index}`, doc.documentBack);
+      }
+    });
+
+    return data;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateStep(currentStep)) return;
+
+    try {
+      setLoading(true);
+      const formDataToSend = prepareFormData();
+
+      const res = await fetchData({
+        url: endpoints.register,
+        method: "POST",
+        data: formDataToSend,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (res.success) {
+        toast.success("Registration successful!");
+        navigate("/verify-otp", {
+          state: {
+            userdata: res.data.email,
+            fromSignup: true,
+          },
+        });
+      }
+    } catch (error) {
+      showErrorToast(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <BasicInfoStep 
+          formData={formData} 
+          onChange={handleInputChange} 
+          errors={fieldErrors}
+          checkingReferral={checkingReferral}
+          referrerName={referrerName}
+        />;
+      case 2:
+        return <AddressStep formData={formData} onChange={handleInputChange} errors={fieldErrors} />;
+      case 3:
+        return <BankKycStep formData={formData} onChange={handleInputChange} errors={fieldErrors} />;
+      case 4:
+        return <UserKycStep 
+          formData={formData} 
+          onChange={handleInputChange} 
+          onFileUpload={handleFileUpload}
+          onAddDocument={addDocument}
+          onRemoveDocument={removeDocument}
+          errors={fieldErrors}
+          documentTypes={documentTypes}
+        />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Complete Your Registration
+          </h1>
+          <p className="text-gray-600">Step {currentStep} of {steps.length}</p>
+        </div>
+
+        {/* Progress Steps */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center space-x-4">
+            {steps.map((step, index) => (
+              <div key={step.number} className="flex items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    currentStep >= step.number
+                      ? "bg-blue-600 border-blue-600 text-white"
+                      : "border-gray-300 text-gray-300"
+                  }`}
+                >
+                  <step.icon size={20} />
+                </div>
+                {index < steps.length - 1 && (
+                  <div
+                    className={`w-20 h-1 ${
+                      currentStep > step.number ? "bg-blue-600" : "bg-gray-300"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Form Container */}
+        <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8">
+          <form onSubmit={handleSubmit}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-8">
+              <Button
+                type="button"
+                title="Back"
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep === 1}
+                className="flex items-center gap-2"
+                icon={ChevronLeft}
+              />
+
+              {currentStep < steps.length ? (
+                <Button
+                  type="button"
+                  title="Next"
+                  onClick={handleNext}
+                  className="flex items-center gap-2"
+                  icon={ChevronRight}
+                  iconPosition="right"
+                />
+              ) : (
+                <Button
+                  type="submit"
+                  title={loading ? "Submitting..." : "Complete Registration"}
+                  loading={loading}
+                  className="flex items-center gap-2"
+                  icon={CheckCircle}
+                />
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Step Components
+const BasicInfoStep = ({ formData, onChange, errors, checkingReferral, referrerName }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {/* Referral Code - Now Required */}
+    <div className="md:col-span-2">
+      <label className="block text-sm font-semibold text-gray-700 mb-2">
+        Referral Code *
+      </label>
+      <input
+        type="text"
+        value={formData.referrerCode}
+        onChange={(e) => {
+          const value = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+          onChange(null, "referrerCode", value);
+        }}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="Enter referral code (8 characters)"
+        maxLength={8}
+      />
+      {checkingReferral && (
+        <p className="text-sm text-blue-600 mt-2 flex items-center">
+          <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></span>
+          Verifying referral code...
+        </p>
+      )}
+      {referrerName && (
+        <p className="text-sm text-green-600 mt-2 flex items-center">
+          <CheckCircle size={16} className="mr-1" />
+          Referred by: {referrerName}
+        </p>
+      )}
+      {errors.referrerCode && (
+        <p className="text-red-500 text-sm mt-1">{errors.referrerCode}</p>
+      )}
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+      <input
+        type="text"
+        value={formData.name}
+        onChange={(e) => onChange(null, "name", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="Enter your full name"
+      />
+      {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
+      <select
+        value={formData.gender}
+        onChange={(e) => onChange(null, "gender", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+      >
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Date of Birth</label>
+      <input
+        type="date"
+        value={formData.dateOfBirth}
+        onChange={(e) => onChange(null, "dateOfBirth", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+      <input
+        type="email"
+        value={formData.email}
+        onChange={(e) => onChange(null, "email", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="Enter your email"
+      />
+      {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Marital Status</label>
+      <input
+        type="text"
+        value={formData.maritalStatus}
+        onChange={(e) => onChange(null, "maritalStatus", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="e.g., Single, Married"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Phone *</label>
+      <input
+        type="tel"
+        value={formData.phone}
+        onChange={(e) => onChange(null, "phone", e.target.value.replace(/\D/g, ""))}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="Enter your phone number"
+        maxLength={10}
+      />
+      {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
+      <input
+        type="password"
+        value={formData.password}
+        onChange={(e) => onChange(null, "password", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="Create password"
+      />
+      {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+    </div>
+
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password *</label>
+      <input
+        type="password"
+        value={formData.confirmPassword}
+        onChange={(e) => onChange(null, "confirmPassword", e.target.value)}
+        className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+        placeholder="Confirm password"
+      />
+      {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+    </div>
+  </div>
+);
+
+// AddressStep and BankKycStep components same rahenge (previous code jaise)
+
+const UserKycStep = ({ formData, onChange, onFileUpload, onAddDocument, onRemoveDocument, errors, documentTypes }) => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h3 className="text-lg font-semibold text-gray-700">KYC Documents</h3>
+      <Button
+        type="button"
+        title="Add Another Document"
+        variant="outline"
+        onClick={onAddDocument}
+        className="text-sm"
+      />
+    </div>
+
+    {formData.userKyc.documents.map((document, index) => (
+      <div key={index} className="border-2 border-gray-200 rounded-xl p-6 relative">
+        {formData.userKyc.documents.length > 1 && (
+          <button
+            type="button"
+            onClick={() => onRemoveDocument(index)}
+            className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+          >
+            × Remove
+          </button>
+        )}
+        
+        <h4 className="font-semibold text-gray-700 mb-4">Document {index + 1}</h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Document Type *</label>
+            <select
+              value={document.documentType}
+              onChange={(e) => onChange("userKyc", "documentType", e.target.value, index)}
+              className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+            >
+              <option value="">Select Document Type</option>
+              {documentTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+            {errors[`documentType_${index}`] && (
+              <p className="text-red-500 text-sm mt-1">{errors[`documentType_${index}`]}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Document Number *</label>
+            <input
+              type="text"
+              value={document.documentNumber}
+              onChange={(e) => onChange("userKyc", "documentNumber", e.target.value, index)}
+              className="w-full px-4 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+              placeholder="Document number"
+            />
+            {errors[`documentNumber_${index}`] && (
+              <p className="text-red-500 text-sm mt-1">{errors[`documentNumber_${index}`]}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Document Front *</label>
+            <input
+              type="file"
+              onChange={(e) => onFileUpload("documentFront", e.target.files[0], index)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+              accept="image/*,.pdf"
+            />
+            {errors[`documentFront_${index}`] && (
+              <p className="text-red-500 text-sm mt-1">{errors[`documentFront_${index}`]}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Document Back</label>
+            <input
+              type="file"
+              onChange={(e) => onFileUpload("documentBack", e.target.files[0], index)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500"
+              accept="image/*,.pdf"
+            />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+
+
+// AddressStep and BankKycStep components previous code ke jaise rahenge
+// Unme koi change nahi hai, isliye main repeat nahi kar raha
+
+export default MultiStepSignup;

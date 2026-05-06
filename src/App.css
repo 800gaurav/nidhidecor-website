@@ -1,0 +1,37 @@
+.bg-color-1{
+     background-color: #131b24 !important;
+      min-height: 100vh; /* Optional: makes background cover full screen */
+      color: #E4E4E4 !important;
+}
+.bg-color-2{
+    background: #161f2a;
+}
+.main-color{
+    color: #ddf247
+}
+.heading-color{
+    color: #e4e4e4;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 45px;
+  aspect-ratio: 0.75;
+  --c: no-repeat linear-gradient(#fff 0 0); /* ✅ white loader bars */
+  background: 
+    var(--c) 0% 50%,
+    var(--c) 50% 50%,
+    var(--c) 100% 50%;
+  background-color: transparent; /* ✅ make sure background is transparent */
+  animation: l7 1s infinite linear alternate;
+}
+@keyframes l7 {
+  0%   { background-size: 20% 50%, 20% 50%, 20% 50%; }
+  20%  { background-size: 20% 20%, 20% 50%, 20% 50%; }
+  40%  { background-size: 20% 100%, 20% 20%, 20% 50%; }
+  60%  { background-size: 20% 50%, 20% 100%, 20% 20%; }
+  80%  { background-size: 20% 50%, 20% 50%, 20% 100%; }
+  100% { background-size: 20% 50%, 20% 50%, 20% 50%; }
+}
+
+
