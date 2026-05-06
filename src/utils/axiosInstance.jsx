@@ -2,11 +2,11 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// export const baseUrl = 'http://localhost:3075';
+
 // export const baseUrl = 'http://192.168.1.52:3075';
 export const baseUrl = 'https://node.axora.homes';
 export const imgBaseUrl = 'https://node.axora.homes';
-// export const baseUrl = 'http://localhost:3075';
+// export const baseUrl = 'http://localhost:5010';
 
 const axiosInstance = (token) => {
   const instance = axios.create({

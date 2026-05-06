@@ -4,15 +4,9 @@
     url("../font/flaticon.woff") format("woff"),
     url("../font/flaticon.woff2") format("woff2"),
     url("../font/flaticon.eot#iefix") format("embedded-opentype"),
-    url("../font/flaticon.svg#flaticon") format("svg");
+  
 }
 
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    @font-face {
-        font-family: "flaticon";
-        src: url("../font/flaticon.svg#Flaticon") format("svg");
-    }
-}
 
 [class^="flaticon-"]:before, [class*="flaticon-"]:before {
     font-family: flaticon !important;

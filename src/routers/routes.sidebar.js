@@ -64,7 +64,7 @@ export const navItems = [
 
     {
         path: "/dashboard/genealogy",
-        label: "Genealogy",
+        label: "Team",
         icon: User2,
         children: [
             { path: "/dashboard/sales-team", label: "Sales Team" },
